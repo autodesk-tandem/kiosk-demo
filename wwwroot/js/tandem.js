@@ -88,3 +88,44 @@ export function getVisibleRooms(facility) {
     }
     return roomMap;
 }
+
+/**
+ * 
+ * @param {Autodesk.Tandem.DtFacility} facility 
+ * @param {string} attrName 
+ * @returns {Promise<[Autodesk.Tandem.FacetDef[], Autodesk.Tandem.FacetDef]>}
+ */
+export async function getFacetDef(facility, attrName) {
+    // find attribute
+    let attr;
+
+    for (const model of facility.modelsList) {
+        const attrs = await model.getAttributes({ native: true });
+        const tmp = attrs.find(a => a.name === attrName);
+
+        if (tmp) {
+            attr = tmp;
+            break;
+        }
+    }
+    //
+    let facetDefs = facility.facetsManager.getFacetDefs();
+    let facetDef = facetDefs.find(f => f.settings.attributeHash === attr.hash);
+
+    if (!facetDef) {
+        // create facet definition
+        const facetSettings = {
+            id: Autodesk.Tandem.FacetTypes.attributes,
+            attributeHash: attr.hash
+        };
+        facetDefs = await facility.facetsManager.addFacetDef(facetSettings, 3);
+        facetDef = facetDefs.find(d => d.settings.attributeHash === attr.hash);
+    }
+    if (facetDef.filter.size === 0) {
+        for (const value of facetDef.attribute.allowedValues.list) {
+            facetDef.filter.add(value);
+        }
+        facetDef.filter.add('(Undefined)');
+    }
+    return [ facetDefs, facetDef ];
+}

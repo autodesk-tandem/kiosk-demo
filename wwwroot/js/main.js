@@ -2,10 +2,30 @@ import {
     initializeViewer,
     startViewer,
     loadFacility,
-    getVisibleRooms } from './tandem.js';
+    getVisibleRooms,
+    getFacetDef } from './tandem.js';
 
 // constants
 const facilityId = 'urn:adsk.dtt:IZ1ILnNBRn-MgN08VXDHSw';
+const displayMode2Attr = {
+    'type': 'Room Type',
+    'status': 'Room Status'
+};
+
+const colorMaps = {
+    'type': {
+        '(Undefined)': '#C0C0C0',
+        'Office': '#FFD800',
+        'Resource': '#0094FF',
+        'spaces:multiple': '#5A5A5A'
+    },
+    'status': {
+        '(Undefined)': '#C0C0C0',
+        'Available': '#B6FF00',
+        'Occupied': '#FF6A00',
+        'spaces:multiple': '#5A5A5A'
+    }
+};
 
 await initializeViewer();
 console.log('initialized');
@@ -22,6 +42,21 @@ const viewNames = views.map(view => view.viewName).sort();
 populateLevels(viewNames);
 // we store map of currently displayed rooms
 let roomMap;
+
+// subscribe to display options
+const btnIds = [
+    'display-mode-default',
+    'display-mode-type',
+    'display-mode-status'
+];
+
+for (const btnId of btnIds) {
+    const btn = document.getElementById(btnId);
+
+    btn.addEventListener('change', async (event) => {
+        await onDisplayModeChange(event.target.value);
+    });
+}
 
 //
 function populateLevels(names) {
@@ -112,4 +147,22 @@ function onRoomMouseOver(name) {
 
 function onRoomMouseLeave() {
     facility.facetsManager.facetsEffects.clearHoveringOverlay();
+}
+
+async function onDisplayModeChange(mode) {
+    console.log(mode);
+    if (mode === 'default') {
+        facility.facetsManager.applyTheme();
+        return;
+    }
+    const attrName = displayMode2Attr[mode];
+    const [ facetDefs, facetDef ] = await getFacetDef(facility, attrName);
+    const settings = facetDefs.map(facetDef => facetDef.getSettings());
+
+    await facility.facetsManager.setSettings(settings);
+    facility.facetsManager.updateFacets();
+    const settingsId = facetDef.getSettings().id;
+    const colorMap = colorMaps[mode];
+
+    facility.facetsManager.applyTheme(settingsId, colorMap);
 }

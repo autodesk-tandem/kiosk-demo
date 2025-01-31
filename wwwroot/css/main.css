@@ -76,10 +76,14 @@ html, body {
 }
 
 .rooms-container {
-    height: 70%;
+    height: calc(70% - 80px);
 }
 
 .room-list-container {
     overflow-y: auto;
     height: calc(100% - 50px);
+}
+
+.display-options {
+    height: 80px;
 }
