@@ -52,21 +52,34 @@ html, body {
     width: 100%;
 }
 
-.levels-title {
+.list-title {
     font-weight: bold;
     padding: 10px;
 }
 
-.levels-container {
+.list-container {
     padding: 0 10px;
 }
 
-.levels-container > div {
+.list-container > div {
     cursor: pointer;
     padding: 4px;
     margin: 4px;
 }
 
-.levels-container > div:hover {
+.list-container > div:hover {
     background-color: #e8e8e8
+}
+
+.levels-container {
+    height: 30%;
+}
+
+.rooms-container {
+    height: 70%;
+}
+
+.room-list-container {
+    overflow-y: auto;
+    height: calc(100% - 50px);
 }

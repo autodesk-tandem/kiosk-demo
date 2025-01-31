@@ -42,8 +42,49 @@ export function startViewer() {
 }
 
 export async function loadFacility(viewer, app, facilityId) {
-    const facility = await app.getFacility(facilityId);
+    let facility = await app.getFacility(facilityId);
+
+    if (!facility) {
+        // this is workaround for the case when facility is not in the current team
+        const teams = await app.getTeams();
+
+        for (const team of teams) {
+            const facilities = await team.getFacilities();
+            const tmp = facilities.find(f => f.twinId === facilityId);
+            
+            if (tmp) {
+                facility = tmp;
+                break;
+            }
+        }
+    }
     await app.displayFacility(facility, false, viewer);
 
     return facility;
+}
+
+/**
+ * 
+ * @param {Autodesk.Tandem.DtFacility} facility 
+ * @returns {Map<string, { dbId: number, model: Autodesk.Viewing.Model}>}
+ */
+export function getVisibleRooms(facility) {
+    // get levels
+    const modelsDef = facility.facetsManager.facetDefs.find(f => f.id === 'models');
+    const levelsDef = facility.facetsManager.facetDefs.find(f => f.id === 'levels');
+    const roomMap = new Map();
+
+    for (const modelId of modelsDef.filter.values()) {
+        const model = facility.models[modelId];
+
+        for (const room of model.getData().rooms) {
+            const levelId = model.getData().dbId2levelId[room.dbId];
+            const level = model.getData().levels.find(l => l.dbId === levelId);
+
+            if (levelsDef.filter.has(level?.name)) {
+                roomMap.set(room.name, { dbId: room.dbId, model: model });
+            }
+        }
+    }
+    return roomMap;
 }
