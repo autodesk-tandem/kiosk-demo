@@ -31,6 +31,16 @@ html, body {
     width: 100%;
 }
 
+.left {
+    height: 100%;
+    width: 300px;
+}
+
+.right {
+    height: 100%;
+    width: calc(100% - 300px);
+}
+
 .viewer-container {
     height: 100%;
     width: 100%;
@@ -40,4 +50,23 @@ html, body {
     height: 100%;
     position: relative;
     width: 100%;
+}
+
+.levels-title {
+    font-weight: bold;
+    padding: 10px;
+}
+
+.levels-container {
+    padding: 0 10px;
+}
+
+.levels-container > div {
+    cursor: pointer;
+    padding: 4px;
+    margin: 4px;
+}
+
+.levels-container > div:hover {
+    background-color: #e8e8e8
 }
