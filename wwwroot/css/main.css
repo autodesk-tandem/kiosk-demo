@@ -1,0 +1,43 @@
+@font-face {
+    font-family: 'ArtifaktElement';
+    src: url('https://fonts.autodesk.com/ArtifaktElement/WOFF2/Artifakt%20Element%20Regular.woff2') format('woff2'),
+      url('https://fonts.autodesk.com/ArtifaktElement/TTF/Artifakt%20Element%20Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+  
+html, body {
+    font-family: 'ArtifaktElement';
+    font-size: 14px;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.header {
+    background-color: rgb(43,43,43);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 10px 0 10px 10px;
+    height: 52px;
+    width: calc(100% - 10px);
+}
+
+.main {
+    display: flex;
+    height: calc(100% - 72px);
+    width: 100%;
+}
+
+.viewer-container {
+    height: 100%;
+    width: 100%;
+}
+
+.viewer {
+    height: 100%;
+    position: relative;
+    width: 100%;
+}
