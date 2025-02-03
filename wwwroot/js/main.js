@@ -7,6 +7,7 @@ import {
 
 // constants
 const facilityId = 'urn:adsk.dtt:IZ1ILnNBRn-MgN08VXDHSw';
+const viewGroup = 'Levels';
 const displayMode2Attr = {
     'type': 'Room Type',
     'status': 'Room Status'
@@ -44,7 +45,7 @@ await facility.waitForAllModels();
 console.log('facility loaded');
 // load views - we have one view for each level
 const views = await app.views.fetchFacilityViews(facility);
-const viewNames = views.map(view => view.viewName).sort();
+const viewNames = views.filter(view => view.label === viewGroup).map(view => view.viewName).sort();
 
 populateLevels(viewNames);
 // we store map of currently displayed rooms
