@@ -27,12 +27,19 @@ const colorMaps = {
     }
 };
 
+const legendMap = {
+    'type': 'legend-type',
+    'status': 'legend-status'
+};
+
 await initializeViewer();
 console.log('initialized');
 const viewer = await startViewer();
 const app = new Autodesk.Tandem.DtApp();
 const facility = await loadFacility(viewer, app, facilityId);
-
+// turn off levels layer
+facility.hud.layers.setLayerVisibility(Autodesk.Tandem.DtConstants.HUD_LAYER.LEVELS.id, false);
+// wait until facility is loaded
 await facility.waitForAllModels();
 console.log('facility loaded');
 // load views - we have one view for each level
@@ -150,7 +157,7 @@ function onRoomMouseLeave() {
 }
 
 async function onDisplayModeChange(mode) {
-    console.log(mode);
+    updateLegend(mode);
     if (mode === 'default') {
         facility.facetsManager.applyTheme();
         return;
@@ -165,4 +172,19 @@ async function onDisplayModeChange(mode) {
     const colorMap = colorMaps[mode];
 
     facility.facetsManager.applyTheme(settingsId, colorMap);
+}
+
+function updateLegend(mode) {
+    for (const [ type, id ] of Object.entries(legendMap)) {
+        const legend = document.getElementById(id);
+
+        if (!legend) {
+            continue;
+        }
+        if (type === mode) {
+            legend.style.display = '';
+        } else {
+            legend.style.display = 'none';
+        }
+    }
 }

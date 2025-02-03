@@ -76,7 +76,7 @@ html, body {
 }
 
 .rooms-container {
-    height: calc(70% - 80px);
+    height: calc(70% - 140px);
 }
 
 .room-list-container {
@@ -85,5 +85,29 @@ html, body {
 }
 
 .display-options {
-    height: 80px;
+    height: 20px;
+    margin: 10px 0 10px 0;
+}
+
+.legend {
+    display: flex;
+    flex-direction: column;
+    height: 100px;
+}
+
+.legend-item {
+    display: flex;
+    flex-direction: row;
+    height: 20px;
+    padding: 4px;
+}
+
+.legend-color {
+    height: 18px;
+    margin: 0 4px 0 0;
+    width: 40px;
+}
+
+.legend-text {
+    font-size: 12px;
 }
