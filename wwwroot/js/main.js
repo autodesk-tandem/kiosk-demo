@@ -3,7 +3,8 @@ import {
     startViewer,
     loadFacility,
     getVisibleRooms,
-    getFacetDef } from './tandem.js';
+    getFacetDef,
+    getRoomInfoFromStreams } from './tandem.js';
 
 // constants
 const facilityId = 'urn:adsk.dtt:IZ1ILnNBRn-MgN08VXDHSw';
@@ -32,6 +33,12 @@ const colorMaps = {
 const legendMap = {
     'type': 'legend-type',
     'status': 'legend-status'
+};
+
+const roomAttrMap = {
+    'CO2': 'co2-value',
+    'Humidity': 'humidity-value',
+    'Temperature': 'temperature-value'
 };
 
 await initializeViewer();
@@ -66,8 +73,10 @@ for (const btnId of btnIds) {
         await onDisplayModeChange(event.target.value);
     });
 }
+// collect room info from streams
+const roomInfos = await getRoomInfoFromStreams(facility);
+const divRoomDetails = document.getElementById('room-details');
 
-//
 function populateLevels(names) {
     const container = document.getElementById('levels');
 
@@ -154,10 +163,13 @@ function onRoomMouseOver(name) {
         dbId: item.dbId
     };
     facility.facetsManager.facetsEffects.addSpaceHighlight(node);
+    // display room data
+    displayRoomInfo(name, roomInfos, roomAttrMap, divRoomDetails);
 }
 
 function onRoomMouseLeave() {
     facility.facetsManager.facetsEffects.clearHoveringOverlay();
+    divRoomDetails.style.display = 'none';
 }
 
 async function onDisplayModeChange(mode) {
@@ -191,4 +203,21 @@ function updateLegend(mode) {
             legend.style.display = 'none';
         }
     }
+}
+
+function displayRoomInfo(name, roomInfos,roomAttrMap, element)
+{
+    const roomData = roomInfos.get(name);
+
+    if (!roomData) {
+        element.style.display = 'none';
+        return;
+    }
+    for (const [key, value] of Object.entries(roomData)) {
+        const elementId = roomAttrMap[key];
+        const childElement = document.getElementById(elementId);
+
+        childElement.innerText = value;
+    }
+    element.style.display = '';
 }

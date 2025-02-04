@@ -129,3 +129,33 @@ export async function getFacetDef(facility, attrName) {
     }
     return [ facetDefs, facetDef ];
 }
+
+export async function getRoomInfoFromStreams(facility) {
+    const streamInfos = await facility.streamMgr.getAllStreamInfos();
+    const streamIds = streamInfos.map(s => s.dbId);
+    const streamData = await facility.streamMgr.getLastReadings(streamIds, true);
+    // get rooms
+    const result = new Map();
+
+    for (const model of facility.modelsList) {
+        for (const room of model.getData().rooms) {
+            const streamInfo = streamInfos.find(s => s.hostElement.model.id === model.id && s.hostElement.hostId === room.dbId);
+
+            if (!streamInfo) {
+                continue;
+            }
+            const roomData = {};
+
+            for (const attr of streamInfo.streamAttrs) {
+                const index = streamIds.indexOf(streamInfo.dbId);
+                const value = streamData[index][attr.id].val;
+
+                roomData[attr.name] = value;
+            }
+            if (Object.keys(roomData).length > 0) {
+                result.set(room.name, roomData);
+            }
+        }
+    }
+    return result;
+}

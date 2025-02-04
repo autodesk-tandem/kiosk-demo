@@ -111,3 +111,17 @@ html, body {
 .legend-text {
     font-size: 12px;
 }
+
+.room-details {
+    background-color: rgba(43,43,43, 0.1);
+    position: absolute;
+    height: fit-content;
+    margin: 10px;
+    padding: 4px;
+    width: 160px;
+    z-index: 10;
+}
+
+.room-value {
+    margin: 0 4px 0 0;
+}
