@@ -16,6 +16,7 @@ const displayMode2Attr = {
 const colorMaps = {
     'type': {
         '(Undefined)': '#C0C0C0',
+        'Meeting Room': '#B6FF00',
         'Office': '#FFD800',
         'Resource': '#0094FF',
         'spaces:multiple': '#5A5A5A'
@@ -113,6 +114,8 @@ async function onLevelClick(name) {
         return;
     }
     await app.views.setCurrentView(facility, view);
+    // hide level labels
+    facility.hud.layers.setLayerVisibility(Autodesk.Tandem.DtConstants.HUD_LAYER.LEVELS.id, false);
     // we store room map for subsequent calls
     roomMap = getVisibleRooms(facility);
     const roomNames = Array.from(roomMap.keys()).sort();
