@@ -1,3 +1,8 @@
+/**
+ * Initializes the viewer.
+ * 
+ * @returns {Promise<void>}
+ */
 export function initializeViewer() {
     return new Promise((resolve, reject) => {
         const options = {
@@ -30,8 +35,13 @@ function getToken(callback) {
     });
 } 
 
-export function startViewer() {
-    const viewer = new Autodesk.Viewing.GuiViewer3D(document.getElementById('viewer'), {
+/**
+ * Starts the viewer.
+ * 
+ * @returns {Autodesk.Viewing.GuiViewer3D}
+ */
+export function startViewer(elementName) {
+    const viewer = new Autodesk.Viewing.GuiViewer3D(document.getElementById(elementName), {
         extensions: ['Autodesk.BoxSelection'],
         screenModeDelegate: Autodesk.Viewing.NullScreenModeDelegate,
         theme: 'light-theme'
@@ -41,6 +51,14 @@ export function startViewer() {
     return viewer;
 }
 
+/**
+ * Loads facility and displays it in the viewer.
+ * 
+ * @param {Autodesk.Viewing.GuiViewer3D} viewer 
+ * @param {Autodesk.Tandem.DtApp} app 
+ * @param {string} facilityId 
+ * @returns {Promise<Autodesk.Tandem.DtFacility>}
+ */
 export async function loadFacility(viewer, app, facilityId) {
     let facility = await app.getFacility(facilityId);
 
@@ -64,12 +82,13 @@ export async function loadFacility(viewer, app, facilityId) {
 }
 
 /**
+ * Get visible rooms in the facility.
  * 
  * @param {Autodesk.Tandem.DtFacility} facility 
  * @returns {Map<string, { dbId: number, model: Autodesk.Viewing.Model}>}
  */
 export function getVisibleRooms(facility) {
-    // get levels
+    // get models & levels which are displayed in current view based on filter
     const modelsDef = facility.facetsManager.facetDefs.find(f => f.id === 'models');
     const levelsDef = facility.facetsManager.facetDefs.find(f => f.id === 'levels');
     const roomMap = new Map();
@@ -90,6 +109,8 @@ export function getVisibleRooms(facility) {
 }
 
 /**
+ * Return or creates new facet definition for give attribute name. Returns tuple of
+ * facet definitions and facet definition for the attribute.
  * 
  * @param {Autodesk.Tandem.DtFacility} facility 
  * @param {string} attrName 
@@ -130,6 +151,12 @@ export async function getFacetDef(facility, attrName) {
     return [ facetDefs, facetDef ];
 }
 
+/**
+ * Returns room information from streams.
+ * 
+ * @param {Autodesk.Tandem.DtFacility} facility 
+ * @returns {Promise<Map<string, { [key: string]: number | string; }>>}
+ */
 export async function getRoomInfoFromStreams(facility) {
     const streamInfos = await facility.streamMgr.getAllStreamInfos();
     const streamIds = streamInfos.map(s => s.dbId);

@@ -43,7 +43,7 @@ const roomAttrMap = {
 
 await initializeViewer();
 console.log('initialized');
-const viewer = await startViewer();
+const viewer = await startViewer('viewer');
 const app = new Autodesk.Tandem.DtApp();
 const facility = await loadFacility(viewer, app, facilityId);
 // turn off levels layer
@@ -77,6 +77,11 @@ for (const btnId of btnIds) {
 const roomInfos = await getRoomInfoFromStreams(facility);
 const divRoomDetails = document.getElementById('room-details');
 
+/**
+ * Populates list of levels.
+ * 
+ * @param {Array<string>} names 
+ */
 function populateLevels(names) {
     const container = document.getElementById('levels');
 
@@ -93,6 +98,11 @@ function populateLevels(names) {
     }
 }
 
+/**
+ * Populates list of rooms.
+ * 
+ * @param {Array<string>} names 
+ */
 function populateRooms(names) {
     const container = document.getElementById('rooms');
 
@@ -115,6 +125,13 @@ function populateRooms(names) {
     }
 }
 
+/**
+ * Called when user clicks on the name in the list of levels. Sets current view based on the name.
+ * Populates list of rooms.
+ * 
+ * @param {string} name 
+ * @returns {Promise<void>}
+ */
 async function onLevelClick(name) {
     console.log(`level selected: ${name}`);
     const view = views.find(v => v.viewName === name);
@@ -132,6 +149,12 @@ async function onLevelClick(name) {
     populateRooms(roomNames);
 }
 
+/**
+ * Called when user click on the name in the list of rooms. Selects room in the viewer.
+ * 
+ * @param {string} name 
+ * @returns {Promise<void>}
+ */
 async function onRoomClick(name) {
     console.log(`room selected: ${name}`);
     if (!roomMap) {
@@ -152,6 +175,12 @@ async function onRoomClick(name) {
     viewer.setAggregateSelection(selection);
 }
 
+/**
+ * Called when mouse is over the name in the list of rooms. Highlights room in the viewer.
+ * Displays room informatio.
+ * 
+ * @param {string} name 
+ */
 function onRoomMouseOver(name) {
     const item = roomMap?.get(name);
 
@@ -167,11 +196,21 @@ function onRoomMouseOver(name) {
     displayRoomInfo(name, roomInfos, roomAttrMap, divRoomDetails);
 }
 
+/**
+ * Clears room highlight and hides room information.
+ * 
+ */
 function onRoomMouseLeave() {
     facility.facetsManager.facetsEffects.clearHoveringOverlay();
     divRoomDetails.style.display = 'none';
 }
 
+/**
+ * Called when user changes display mode. Sets theme based on the mode.
+ * 
+ * @param {string} mode 
+ * @returns {Promise<void>}
+ */
 async function onDisplayModeChange(mode) {
     updateLegend(mode);
     if (mode === 'default') {
@@ -190,6 +229,11 @@ async function onDisplayModeChange(mode) {
     facility.facetsManager.applyTheme(settingsId, colorMap);
 }
 
+/**
+ * Updates legend based on the mode.
+ * 
+ * @param {string} mode 
+ */
 function updateLegend(mode) {
     for (const [ type, id ] of Object.entries(legendMap)) {
         const legend = document.getElementById(id);
@@ -205,6 +249,15 @@ function updateLegend(mode) {
     }
 }
 
+/**
+ * Displays room information.
+ * 
+ * @param {string} name 
+ * @param {Map<string, { [key: string]: number | string; }>} roomInfos 
+ * @param {Map<string, string>} roomAttrMap 
+ * @param {HTMLDivElement} element 
+ * @returns 
+ */
 function displayRoomInfo(name, roomInfos,roomAttrMap, element)
 {
     const roomData = roomInfos.get(name);
@@ -217,7 +270,10 @@ function displayRoomInfo(name, roomInfos,roomAttrMap, element)
         const elementId = roomAttrMap[key];
         const childElement = document.getElementById(elementId);
 
-        childElement.innerText = value;
+        if (!childElement) {
+            continue;
+        }
+        childElement.innerText = value.toString();
     }
     element.style.display = '';
 }
