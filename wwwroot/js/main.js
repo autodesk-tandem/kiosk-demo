@@ -87,7 +87,7 @@ function populateLevels(names) {
 
     container.innerHTML = '';
     for (const name of names) {
-        const levelElement = document.createElement('div');
+        const levelElement = document.createElement('li');
         
         levelElement.innerText = name;
         levelElement.dataset.level = name;
@@ -108,7 +108,7 @@ function populateRooms(names) {
 
     container.innerHTML = '';
     for (const name of names) {
-        const roomElement = document.createElement('div');
+        const roomElement = document.createElement('li');
         
         roomElement.innerText = name;
         roomElement.dataset.room = name;
