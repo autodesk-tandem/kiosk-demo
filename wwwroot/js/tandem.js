@@ -186,3 +186,43 @@ export async function getRoomInfoFromStreams(facility) {
     }
     return result;
 }
+
+/**
+ * Creates map of room properties.
+ * 
+ * @param {Autodesk.Tandem.DtFacility} facility 
+ * @param {Array<string>} propNames 
+ * @returns {Promise<Map<string, { [key: string]: any; }>>}
+ */
+export async function getRoomProps(facility, propNames) {
+    const result = new Map();
+
+    for (const model of facility.modelsList) {
+        const rooms = model.getData().rooms;
+        const dbIds = rooms.map(r => r.dbId);
+
+        if (dbIds.length === 0) {
+            continue;
+        }
+        const items = await model.getPropertiesDt(dbIds);
+
+        for (const room of rooms) {
+            const item = items.find(i => i.element.dbId === room.dbId);
+
+            if (!item) {
+                continue;
+            }
+            const roomData = {};
+
+            for (const prop of item.element.properties) {
+                if (propNames.includes(prop.displayName) && prop.displayValue) {
+                    roomData[prop.displayName] = prop.displayValue;
+                }
+            }
+            if (Object.keys(roomData).length > 0) {
+                result.set(room.name, roomData);
+            }
+        }
+    }
+    return result;
+}

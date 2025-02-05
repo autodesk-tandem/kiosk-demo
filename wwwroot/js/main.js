@@ -4,16 +4,20 @@ import {
     loadFacility,
     getVisibleRooms,
     getFacetDef,
-    getRoomInfoFromStreams } from './tandem.js';
+    getRoomInfoFromStreams,
+    getRoomProps } from './tandem.js';
+import { mergeMaps } from './util.js';
 
 // constants
 const facilityId = 'urn:adsk.dtt:IZ1ILnNBRn-MgN08VXDHSw';
+// the label of the view group that contains views for each level
 const viewGroup = 'Levels';
 const displayMode2Attr = {
     'type': 'Room Type',
     'status': 'Room Status'
 };
 
+// color maps for room types and statuses
 const colorMaps = {
     'type': {
         '(Undefined)': '#C0C0C0',
@@ -30,16 +34,24 @@ const colorMaps = {
     }
 };
 
+// map of display mode to element id of the legend
 const legendMap = {
     'type': 'legend-type',
     'status': 'legend-status'
 };
 
+// map of room attribute to element id
 const roomAttrMap = {
+    'Room Status': 'room-status',
+    'Room Type': 'room-type',
     'CO2': 'co2-value',
     'Humidity': 'humidity-value',
     'Temperature': 'temperature-value'
 };
+
+// main code
+const roomDetailsElement = document.getElementById('room-details');
+const roomNameElement = document.getElementById('room-name');
 
 await initializeViewer();
 console.log('initialized');
@@ -73,9 +85,12 @@ for (const btnId of btnIds) {
         await onDisplayModeChange(event.target.value);
     });
 }
-// collect room info from streams
+// collect room info (streams & props)
 const roomInfos = await getRoomInfoFromStreams(facility);
-const divRoomDetails = document.getElementById('room-details');
+const roomProps = await getRoomProps(facility, Object.values(displayMode2Attr));
+
+mergeMaps(roomInfos, roomProps);
+
 
 /**
  * Populates list of levels.
@@ -193,7 +208,7 @@ function onRoomMouseOver(name) {
     };
     facility.facetsManager.facetsEffects.addSpaceHighlight(node);
     // display room data
-    displayRoomInfo(name, roomInfos, roomAttrMap, divRoomDetails);
+    displayRoomInfo(name, roomInfos, roomAttrMap, roomDetailsElement);
 }
 
 /**
@@ -202,7 +217,7 @@ function onRoomMouseOver(name) {
  */
 function onRoomMouseLeave() {
     facility.facetsManager.facetsEffects.clearHoveringOverlay();
-    divRoomDetails.style.display = 'none';
+    roomDetailsElement.style.display = 'none';
 }
 
 /**
@@ -254,11 +269,11 @@ function updateLegend(mode) {
  * 
  * @param {string} name 
  * @param {Map<string, { [key: string]: number | string; }>} roomInfos 
- * @param {Map<string, string>} roomAttrMap 
- * @param {HTMLDivElement} element 
+ * @param {{ [key: string]: string; }} roomAttrMap 
+ * @param {HTMLElement} element 
  * @returns 
  */
-function displayRoomInfo(name, roomInfos,roomAttrMap, element)
+function displayRoomInfo(name, roomInfos, roomAttrMap, element)
 {
     const roomData = roomInfos.get(name);
 
@@ -266,6 +281,7 @@ function displayRoomInfo(name, roomInfos,roomAttrMap, element)
         element.style.display = 'none';
         return;
     }
+    roomNameElement.innerText = name;
     for (const [key, value] of Object.entries(roomData)) {
         const elementId = roomAttrMap[key];
         const childElement = document.getElementById(elementId);

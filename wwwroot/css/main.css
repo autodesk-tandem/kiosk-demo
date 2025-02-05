@@ -131,3 +131,8 @@ html, body {
 .room-value {
     margin: 0 4px 0 0;
 }
+
+.room-name {
+    font-size: 15px;
+    font-weight: bold;
+}
