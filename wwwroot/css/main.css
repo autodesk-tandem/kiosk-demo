@@ -73,8 +73,8 @@ html, body {
     background-color: #f2f2f2;
 }
 
-.list-container > div:hover {
-    background-color: #e8e8e8
+.selected {
+    background-color: #e8e8e8;
 }
 
 .levels-container {

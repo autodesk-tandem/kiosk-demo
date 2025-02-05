@@ -50,6 +50,8 @@ const roomAttrMap = {
 };
 
 // main code
+const levelsElement = document.getElementById('levels');
+const roomsElement = document.getElementById('rooms');
 const roomDetailsElement = document.getElementById('room-details');
 const roomNameElement = document.getElementById('room-name');
 
@@ -67,7 +69,7 @@ console.log('facility loaded');
 const views = await app.views.fetchFacilityViews(facility);
 const viewNames = views.filter(view => view.label === viewGroup).map(view => view.viewName).sort();
 
-populateLevels(viewNames);
+populateLevels(levelsElement, viewNames);
 // we store map of currently displayed rooms
 let roomMap;
 
@@ -81,6 +83,9 @@ const btnIds = [
 for (const btnId of btnIds) {
     const btn = document.getElementById(btnId);
 
+    if (!btn) {
+        continue;
+    }
     btn.addEventListener('change', async (event) => {
         await onDisplayModeChange(event.target.value);
     });
@@ -95,11 +100,10 @@ mergeMaps(roomInfos, roomProps);
 /**
  * Populates list of levels.
  * 
+ * @param {HTMLElement} container
  * @param {Array<string>} names 
  */
-function populateLevels(names) {
-    const container = document.getElementById('levels');
-
+function populateLevels(container, names) {
     container.innerHTML = '';
     for (const name of names) {
         const levelElement = document.createElement('li');
@@ -107,7 +111,7 @@ function populateLevels(names) {
         levelElement.innerText = name;
         levelElement.dataset.level = name;
         levelElement.addEventListener('click', async (event) => {
-            await onLevelClick(event?.target?.dataset?.level);
+            await onLevelClick(event.target, event?.target?.dataset?.level);
         });
         container.appendChild(levelElement);
     }
@@ -116,11 +120,10 @@ function populateLevels(names) {
 /**
  * Populates list of rooms.
  * 
+ * @param {HTMLElement} container
  * @param {Array<string>} names 
  */
-function populateRooms(names) {
-    const container = document.getElementById('rooms');
-
+function populateRooms(container, names) {
     container.innerHTML = '';
     for (const name of names) {
         const roomElement = document.createElement('li');
@@ -128,7 +131,7 @@ function populateRooms(names) {
         roomElement.innerText = name;
         roomElement.dataset.room = name;
         roomElement.addEventListener('click', async (event) => {
-            await onRoomClick(event?.target?.dataset?.room);
+            await onRoomClick(event.target, event?.target?.dataset?.room);
         });
         roomElement.addEventListener('mouseover', (event) => {
             onRoomMouseOver(event?.target?.dataset?.room);
@@ -144,11 +147,19 @@ function populateRooms(names) {
  * Called when user clicks on the name in the list of levels. Sets current view based on the name.
  * Populates list of rooms.
  * 
+ * @param {HTMLElement} element
  * @param {string} name 
  * @returns {Promise<void>}
  */
-async function onLevelClick(name) {
+async function onLevelClick(element, name) {
     console.log(`level selected: ${name}`);
+    // remove existing selection and set new one
+    const selected = element.parentElement.querySelector('.selected');
+
+    if (selected) {
+        selected.classList.remove('selected');
+    }
+    element.classList.add('selected');
     const view = views.find(v => v.viewName === name);
 
     if (!view) {
@@ -161,17 +172,25 @@ async function onLevelClick(name) {
     roomMap = getVisibleRooms(facility);
     const roomNames = Array.from(roomMap.keys()).sort();
 
-    populateRooms(roomNames);
+    populateRooms(roomsElement, roomNames);
 }
 
 /**
  * Called when user click on the name in the list of rooms. Selects room in the viewer.
  * 
+ * @param {HTMLElement} element
  * @param {string} name 
  * @returns {Promise<void>}
  */
-async function onRoomClick(name) {
+async function onRoomClick(element, name) {
     console.log(`room selected: ${name}`);
+    // remove existing selection and set new one
+    const selected = element.parentElement.querySelector('.selected');
+
+    if (selected) {
+        selected.classList.remove('selected');
+    }
+    element.classList.add('selected');
     if (!roomMap) {
         return;
     }
