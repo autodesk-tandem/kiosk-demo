@@ -95,10 +95,11 @@ export function getVisibleRooms(facility) {
 
     for (const modelId of modelsDef.filter.values()) {
         const model = facility.models[modelId];
+        const modelData = model.getData();
 
-        for (const room of model.getData().rooms) {
-            const levelId = model.getData().dbId2levelId[room.dbId];
-            const level = model.getData().levels.find(l => l.dbId === levelId);
+        for (const room of modelData.rooms) {
+            const levelId = modelData.dbId2levelId[room.dbId];
+            const level = modelData.levels.find(l => l.dbId === levelId);
 
             if (levelsDef.filter.has(level?.name)) {
                 roomMap.set(room.name, { dbId: room.dbId, model: model });
