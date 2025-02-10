@@ -46,7 +46,8 @@ const roomAttrMap = {
     'Room Type': 'room-type',
     'CO2': 'co2-value',
     'Humidity': 'humidity-value',
-    'Temperature': 'temperature-value'
+    'Temperature': 'temperature-value',
+    'Area': 'room-area'
 };
 
 // main code
@@ -92,7 +93,7 @@ for (const btnId of btnIds) {
 }
 // collect room info (streams & props)
 const roomInfos = await getRoomInfoFromStreams(facility);
-const roomProps = await getRoomProps(facility, Object.values(displayMode2Attr));
+const roomProps = await getRoomProps(facility, Object.keys(roomAttrMap));
 
 mergeMaps(roomInfos, roomProps);
 
@@ -308,7 +309,12 @@ function displayRoomInfo(name, roomInfos, roomAttrMap, element)
         if (!childElement) {
             continue;
         }
-        childElement.innerText = value.toString();
+        // number of decimal places is hardcoded to 2
+        if (typeof value === 'number') {
+            childElement.innerText = value.toFixed(2);
+        } else {
+            childElement.innerText = value.toString();
+        }
     }
     element.style.display = '';
 }
