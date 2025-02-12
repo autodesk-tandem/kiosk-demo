@@ -132,6 +132,10 @@ html, body {
     margin: 0 4px 0 0;
 }
 
+.room-value-row:has(.room-value:empty) {
+    display: none;
+}
+
 .room-name {
     font-size: 15px;
     font-weight: bold;
