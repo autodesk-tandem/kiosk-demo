@@ -95,7 +95,7 @@ for (const btnId of btnIds) {
 const roomInfos = await getRoomInfoFromStreams(facility);
 const roomProps = await getRoomProps(facility, Object.keys(roomAttrMap));
 
-mergeMaps(roomInfos, roomProps);
+mergeMaps(roomProps, roomInfos);
 
 
 /**
@@ -228,7 +228,7 @@ function onRoomMouseOver(name) {
     };
     facility.facetsManager.facetsEffects.addSpaceHighlight(node);
     // display room data
-    displayRoomInfo(name, roomInfos, roomAttrMap, roomDetailsElement);
+    displayRoomInfo(name, roomProps, roomAttrMap, roomDetailsElement);
 }
 
 /**
@@ -288,29 +288,32 @@ function updateLegend(mode) {
  * Displays room information.
  * 
  * @param {string} name 
- * @param {Map<string, { [key: string]: number | string; }>} roomInfos 
+ * @param {Map<string, { [key: string]: number | string; }>} roomProps 
  * @param {{ [key: string]: string; }} roomAttrMap 
  * @param {HTMLElement} element 
  * @returns 
  */
-function displayRoomInfo(name, roomInfos, roomAttrMap, element)
+function displayRoomInfo(name, roomProps, roomAttrMap, element)
 {
-    const roomData = roomInfos.get(name);
+    const roomData = roomProps.get(name);
 
     if (!roomData) {
         element.style.display = 'none';
         return;
     }
     roomNameElement.innerText = name;
-    for (const [key, value] of Object.entries(roomData)) {
-        const elementId = roomAttrMap[key];
+    for (const [name, elementId] of Object.entries(roomAttrMap)) {
         const childElement = document.getElementById(elementId);
 
         if (!childElement) {
             continue;
         }
+        const value = roomData[name];
+        
         // number of decimal places is hardcoded to 2
-        if (typeof value === 'number') {
+        if (value === undefined) {
+            childElement.innerText = '';
+        } else if (typeof value === 'number') {
             childElement.innerText = value.toFixed(2);
         } else {
             childElement.innerText = value.toString();

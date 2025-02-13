@@ -197,9 +197,11 @@ export async function getRoomInfoFromStreams(facility) {
  */
 export async function getRoomProps(facility, propNames) {
     const result = new Map();
+    const views = await facility.getSavedViewsList();
 
     for (const model of facility.modelsList) {
-        const rooms = model.getData().rooms;
+        const modelData = model.getData();
+        const rooms = modelData.rooms;
         const dbIds = rooms.map(r => r.dbId);
 
         if (dbIds.length === 0) {
@@ -218,6 +220,19 @@ export async function getRoomProps(facility, propNames) {
             for (const prop of item.element.properties) {
                 if (propNames.includes(prop.displayName) && prop.displayValue) {
                     roomData[prop.displayName] = prop.displayValue;
+                }
+            }
+            // add level name. in our case the level name is actually name of the corresponding view
+            const levelId = modelData.dbId2levelId[item.element.dbId];
+            const level = modelData.levelMap[levelId];
+
+            if (level) {
+                // find related view
+                for (const view of views) {
+                    if (view.facets.filters.levels.has(level.name)) {
+                        roomData['Level'] = view.viewName;
+                        break;
+                    }
                 }
             }
             if (Object.keys(roomData).length > 0) {
