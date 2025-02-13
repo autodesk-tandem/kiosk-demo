@@ -6,6 +6,7 @@ import {
     getFacetDef,
     getRoomInfoFromStreams,
     getRoomProps } from './tandem.js';
+import { processMessage } from './chat.js';
 import { mergeMaps } from './util.js';
 
 // constants
@@ -49,6 +50,8 @@ const roomAttrMap = {
     'Temperature': 'temperature-value',
     'Area': 'room-area'
 };
+
+let currentLevel = 'Level 00';
 
 // main code
 const levelsElement = document.getElementById('levels');
@@ -97,6 +100,31 @@ const roomProps = await getRoomProps(facility, Object.keys(roomAttrMap));
 
 mergeMaps(roomProps, roomInfos);
 
+// chat
+const chatBtn = document.getElementById('chat-btn');
+
+chatBtn?.addEventListener('click', async () => {
+    await onSendChatMessage();
+});
+
+const promptOptions = {
+    'prompt-option-1': 'Find available rooms on current level.',
+    'prompt-option-2': 'Find largest available room on current level.'
+};
+
+const chatPromptElement = document.getElementById('chat-prompt');
+const chatMessageElement = document.getElementById('chat-message');
+
+for (const [ btnId, message] of Object.entries(promptOptions)) {
+    const btn = document.getElementById(btnId);
+
+    if (!btn) {
+        continue;
+    }
+    btn.addEventListener('click', () => {
+        setPrompt(message);
+    });
+}
 
 /**
  * Populates list of levels.
@@ -174,6 +202,8 @@ async function onLevelClick(element, name) {
     const roomNames = Array.from(roomMap.keys()).sort();
 
     populateRooms(roomsElement, roomNames);
+    // store current level
+    currentLevel = name;
 }
 
 /**
@@ -320,4 +350,38 @@ function displayRoomInfo(name, roomProps, roomAttrMap, element)
         }
     }
     element.style.display = '';
+}
+
+function setPrompt(message) {
+    if (chatPromptElement) {
+        chatPromptElement.value = message;
+    }
+}
+
+async function onSendChatMessage() {
+    const prompt = chatPromptElement?.value;
+    let fullPrompt = prompt;
+
+    if (prompt.includes('current level')) {
+        fullPrompt = `${prompt}Current level is \"${currentLevel}\".`;
+    }
+    // prompt
+    const promptElement = document.createElement('div');
+
+    promptElement.innerText = prompt;
+    promptElement.classList.add('chat-message-prompt')
+    chatMessageElement?.appendChild(promptElement);
+    // clear existing value
+    chatPromptElement.value = '';
+    // response
+    const response = await processMessage(fullPrompt, roomProps);
+    
+    console.log(response);
+    const responseElement = document.createElement('div');
+
+    responseElement.innerText = response;
+    responseElement.classList.add('chat-message-response')
+    chatMessageElement?.appendChild(responseElement);
+    // scroll
+    chatMessageElement.scrollTop = chatMessageElement?.scrollHeight;
 }

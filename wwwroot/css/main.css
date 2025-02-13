@@ -5,7 +5,7 @@
     font-weight: normal;
     font-style: normal;
 }
-  
+
 html, body {
     font-family: 'ArtifaktElement', sans-serif;
     font-size: 14px;
@@ -139,4 +139,59 @@ html, body {
 .room-name {
     font-size: 15px;
     font-weight: bold;
+}
+
+.chat-container {
+    background-color: rgba(43, 43, 43, 0.1);
+    bottom: 10px;
+    height: 360px;
+    padding: 4px;
+    position: absolute;
+    right: 10px;
+    width: 300px;
+    z-index: 10;
+}
+
+.chat-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 2px 2px 8px 2px;
+}
+
+.chat-prompts {
+    margin: 0 2px 4px 2px;
+}
+
+.chat-message {
+    height: 166px;
+    margin: 0 0 8px 0;
+    overflow-y: auto;
+}
+
+.chat-message-prompt {
+    background-color: rgba(40, 40, 40, 0.1);
+    margin: 2px 20px 8px 2px;
+    padding: 4px;
+}
+
+.chat-message-response {
+    background-color: rgba(240, 240, 240, 0.8);
+    margin: 2px 2px 8px 20px;
+    padding: 4px;
+}
+
+.chat-prompt-container {
+    align-items: flex-end;
+    display: flex;
+    height: 126px;
+}
+
+.chat-prompt-container > button {
+    height: 24px;
+}
+
+.chat-prompt-container > textarea {
+    box-sizing: border-box;
+    height: 100%;
+    width: 100%;
 }
