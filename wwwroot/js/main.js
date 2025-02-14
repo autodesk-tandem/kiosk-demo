@@ -374,7 +374,10 @@ async function onSendChatMessage() {
     // clear existing value
     chatPromptElement.value = '';
     // response
-    const response = await processMessage(fullPrompt, roomProps);
+    const response = await processMessage(fullPrompt, {
+        roomProps,
+        selector: selectFacilityRooms
+    });
     
     console.log(response);
     const responseElement = document.createElement('div');
@@ -384,4 +387,32 @@ async function onSendChatMessage() {
     chatMessageElement?.appendChild(responseElement);
     // scroll
     chatMessageElement.scrollTop = chatMessageElement?.scrollHeight;
+}
+
+function selectFacilityRooms(names) {
+    // remove existing selection and set new one
+    if (!roomMap) {
+        return;
+    }
+    const selections = [];
+
+    for (const name of names) {
+        const roomData = roomMap.get(name);
+
+        if (!roomData) {
+            continue;
+        }
+        let selection = selections.find(s => s.model.id === roomData.model.id);
+
+        if (!selection) {
+            selection = {
+                model: roomData.model,
+                selection: []
+            };
+            selections.push(selection);
+        }
+        selection.selection.push(roomData.dbId);
+    }
+    // select elements
+    viewer.setAggregateSelection(selections);
 }

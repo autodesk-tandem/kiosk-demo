@@ -45,6 +45,28 @@ const tools = [
             },
             strict: true
         }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'select_rooms',
+            description: 'Select specified rooms.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    names: {
+                        type: 'array',
+                        description: 'List of room names to select.',
+                        items: {
+                            type: 'string'
+                        }
+                    }
+                },
+                required: [ 'names' ],
+                additionalProperties: false
+            },
+            strict: true
+        }
     }
 ];
 
@@ -127,12 +149,17 @@ export async function processMessage(prompt, context) {
 }
 
 function callFunction(name, args, context) {
-    switch (name) {
-        case 'query_rooms':
-            return queryRooms(args, context);
-        default:
-            return '';
+    const functionMap = {
+        'query_rooms': queryRooms,
+        'select_rooms': selectRooms
+    };
+    const fn = functionMap[name];
+
+    if (fn) {
+        console.log(`Calling function: ${name}`);
+        return fn(args, context);
     }
+    return '';
 }
 
 function queryRooms(args, context) {
@@ -144,7 +171,7 @@ function queryRooms(args, context) {
     let value;
     
     if (filter) {
-        for (const [ name, props ] of context.entries()) {
+        for (const [ name, props ] of context.roomProps.entries()) {
             let match =  (filter.level.length === 0 || (props['Level']?.toLocaleLowerCase() === filter.level.toLocaleLowerCase())) &&
                 (filter.status.length === 0 || (props['Room Status']?.toLocaleLowerCase() === filter.status.toLocaleLowerCase()));
 
@@ -158,7 +185,7 @@ function queryRooms(args, context) {
             }
         }
     } else {
-        rooms = Array.from(context.entries()).map(([ name, props ]) => {
+        rooms = Array.from(context.roomProps.entries()).map(([ name, props ]) => {
             return {
                 name,
                 level: props['Level'],
@@ -169,7 +196,7 @@ function queryRooms(args, context) {
         const propName = paramPropMap[parameter];
 
         for (const room of rooms) {
-            const props = context.get(room.name);
+            const props = context.roomProps.get(room.name);
         
             room['parameters'] = {};
             room['parameters'][parameter] = props[propName];
@@ -213,4 +240,9 @@ function queryRooms(args, context) {
         result['rooms'] = rooms;
     }
     return result;
+}
+
+function selectRooms(args, context) {
+    context.selector(args.names);
+    return 'success';
 }
