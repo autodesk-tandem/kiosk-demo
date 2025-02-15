@@ -101,7 +101,6 @@ html, body {
 }
 
 .legend {
-    display: flex;
     flex-direction: column;
     height: 100px;
 }
