@@ -17,8 +17,11 @@ html, body {
 
 .header {
     background-color: rgb(43,43,43);
+    color: rgb(220,220,220);
     display: flex;
     flex-direction: row;
+    font-size: 24px;
+    font-weight: bold;
     justify-content: space-between;
     padding: 10px 0 10px 10px;
     height: 52px;
@@ -26,6 +29,8 @@ html, body {
 }
 
 .main {
+    background-color: rgb(43,43,43);
+    color: rgb(220,220,220);
     display: flex;
     height: calc(100% - 72px);
     width: 100%;
@@ -70,11 +75,11 @@ html, body {
 }
 
 .list-container > li:hover {
-    background-color: rgb(242, 242, 242);
+    background-color: rgb(60,60,60);
 }
 
 .selected {
-    background-color: rgb(232, 232, 232);
+    background-color: rgb(80,80,80);
 }
 
 .levels-container {
@@ -119,7 +124,7 @@ html, body {
 }
 
 .room-details {
-    background-color: rgba(43, 43, 43, 0.1);
+    background-color: rgba(60,60,60,0.8);
     position: absolute;
     height: fit-content;
     margin: 10px;
@@ -152,10 +157,11 @@ html, body {
 
 .waypoint-thumbnail {
     background-color: black;
-    border: solid 1px rgb(169,169,169);
+    border: solid 1px rgb(220,220,220);
     display: none;
     height: 180px;
     left: 80px;
+    margin: 2px;
     position: absolute;
     top: 12px;
     width: 320px;
