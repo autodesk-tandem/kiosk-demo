@@ -140,3 +140,29 @@ html, body {
     font-size: 15px;
     font-weight: bold;
 }
+
+.waypoint {
+    background-color: rgb(112,172,223);
+    border-radius: 5px;
+    display: inline-block;
+    height: 10px;
+    margin: 0 0 0 6px;
+    width: 10px;
+}
+
+.waypoint-thumbnail {
+    background-color: black;
+    border: solid 1px rgb(169,169,169);
+    display: none;
+    height: 180px;
+    left: 80px;
+    position: absolute;
+    top: 12px;
+    width: 320px;
+    z-index: 15;
+}
+
+.waypoint-thumbnail > img {
+    height: 180px;
+    width: 320px;
+}

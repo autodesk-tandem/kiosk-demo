@@ -4,14 +4,18 @@ import {
     loadFacility,
     getVisibleRooms,
     getFacetDef,
+    getLevelViews,
     getRoomInfoFromStreams,
-    getRoomProps } from './tandem.js';
+    getRoomProps,
+    getRoomWaypoints } from './tandem.js';
 import { mergeMaps } from './util.js';
 
 // constants
 const facilityId = 'urn:adsk.dtt:IZ1ILnNBRn-MgN08VXDHSw';
 // the label of the view group that contains views for each level
-const viewGroup = 'Levels';
+const viewLevelsGroup = 'Levels';
+const viewWaypointsGroup = 'Waypoints';
+
 const displayMode2Attr = {
     'type': 'Room Type',
     'status': 'Room Status'
@@ -50,11 +54,15 @@ const roomAttrMap = {
     'Area': 'room-area'
 };
 
+let currentLevel;
+
 // main code
 const levelsElement = document.getElementById('levels');
 const roomsElement = document.getElementById('rooms');
 const roomDetailsElement = document.getElementById('room-details');
 const roomNameElement = document.getElementById('room-name');
+const waypointThumbnailElement = document.getElementById('waypoint-thumbnail');
+const waypointImageElement = document.getElementById('waypoint-thumbnail-image');
 
 await initializeViewer();
 console.log('initialized');
@@ -67,10 +75,10 @@ facility.hud.layers.setLayerVisibility(Autodesk.Tandem.DtConstants.HUD_LAYER.LEV
 await facility.waitForAllModels();
 console.log('facility loaded');
 // load views - we have one view for each level
-const views = await app.views.fetchFacilityViews(facility);
-const viewNames = views.filter(view => view.label === viewGroup).map(view => view.viewName).sort();
+const levelViews = await getLevelViews(facility, viewLevelsGroup);
+const levelNames = Array.from(levelViews.keys()).sort();
 
-populateLevels(levelsElement, viewNames);
+populateLevels(levelsElement, levelNames);
 // we store map of currently displayed rooms
 let roomMap;
 
@@ -94,9 +102,10 @@ for (const btnId of btnIds) {
 // collect room info (streams & props)
 const roomInfos = await getRoomInfoFromStreams(facility);
 const roomProps = await getRoomProps(facility, Object.keys(roomAttrMap));
+const roomNames = Array.from(roomProps.keys());
+const roomWaypoints = await getRoomWaypoints(facility, viewWaypointsGroup, roomNames);
 
 mergeMaps(roomProps, roomInfos);
-
 
 /**
  * Populates list of levels.
@@ -124,7 +133,7 @@ function populateLevels(container, names) {
  * @param {HTMLElement} container
  * @param {Array<string>} names 
  */
-function populateRooms(container, names) {
+function populateRooms(container, names, waypoints) {
     container.innerHTML = '';
     for (const name of names) {
         const roomElement = document.createElement('li');
@@ -140,6 +149,24 @@ function populateRooms(container, names) {
         roomElement.addEventListener('mouseleave', (event) => {
             onRoomMouseLeave();
         });
+        if (waypoints.has(name)) {
+            const waypointElement = document.createElement('span');
+
+            waypointElement.innerText = '';
+            waypointElement.classList.add('waypoint');
+            waypointElement.dataset.room = name;
+            waypointElement.addEventListener('click', async (event) => {
+                event.stopPropagation();
+                await onWaypointClick(event.target, event?.target?.dataset?.room);
+            });
+            waypointElement.addEventListener('mouseover', async (event) => {
+                onWaypointMouseOver(event.target, event?.target?.dataset?.room);
+            });
+            waypointElement.addEventListener('mouseleave', async (event) => {
+                onWaypointMouseLeave();
+            });
+            roomElement.appendChild(waypointElement);
+        }
         container.appendChild(roomElement);
     }
 }
@@ -161,7 +188,7 @@ async function onLevelClick(element, name) {
         selected.classList.remove('selected');
     }
     element.classList.add('selected');
-    const view = views.find(v => v.viewName === name);
+    const view = levelViews.get(name);
 
     if (!view) {
         return;
@@ -173,7 +200,9 @@ async function onLevelClick(element, name) {
     roomMap = getVisibleRooms(facility);
     const roomNames = Array.from(roomMap.keys()).sort();
 
-    populateRooms(roomsElement, roomNames);
+    populateRooms(roomsElement, roomNames, roomWaypoints);
+    // store current level
+    currentLevel = name;
 }
 
 /**
@@ -262,6 +291,38 @@ async function onDisplayModeChange(mode) {
     const colorMap = colorMaps[mode];
 
     facility.facetsManager.applyTheme(settingsId, colorMap);
+}
+
+async function onWaypointClick(element, name) {
+    console.log(`waypoint selected: ${name}`);
+    const view = roomWaypoints.get(name);
+
+    if (!view) {
+        return;
+    }
+    await app.views.setCurrentView(facility, view);
+}
+
+async function onWaypointMouseOver(element, name) {
+    const view = roomWaypoints.get(name);
+
+    if (!view) {
+        return;
+    }
+    const url = '/twins/urn:adsk.dtt:IZ1ILnNBRn-MgN08VXDHSw/views/H3e8rzSyRcGqb5lMs2V1ZA/thumbnail';
+
+    if (waypointImageElement.src !== url) {
+        waypointImageElement.src = url;
+    }
+    const clientRect = element.getBoundingClientRect();
+
+    waypointThumbnailElement.style.left = `${clientRect.left + 20}px`;
+    waypointThumbnailElement.style.top = `${clientRect.top + 20}px`;
+    waypointThumbnailElement.style.display = 'block';
+}
+
+async function onWaypointMouseLeave(element, name) {
+    waypointThumbnailElement.style.display = 'none';
 }
 
 /**

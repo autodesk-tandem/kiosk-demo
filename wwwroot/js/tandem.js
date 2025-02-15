@@ -242,3 +242,46 @@ export async function getRoomProps(facility, propNames) {
     }
     return result;
 }
+
+/**
+ * Returns map of level views.
+ * 
+ * @param {Autodesk.Tandem.DtFacility} facility 
+ * @param {string} viewGroup 
+ * @returns {Promise<Map<string, object>>}
+ */
+export async function getLevelViews(facility, viewGroup) {
+    const result = new Map();
+    const views = await facility.getSavedViewsList();
+
+    for (const view of views) {
+        if (view.label !== viewGroup) {
+            continue;
+        }
+        result.set(view.viewName, view);
+    }
+    return result;
+}
+
+/**
+ * Returns map of room waypoints.
+ * 
+ * @param {Autodesk.Tandem.DtFacility} facility 
+ * @param {string} viewGroup 
+ * @param {string[]} roomNames 
+ * @returns {Promise<Map<string, object>>}
+ */
+export async function getRoomWaypoints(facility, viewGroup, roomNames) {
+    const result = new Map();
+    const views = await facility.getSavedViewsList();
+
+    for (const view of views) {
+        if (view.label !== viewGroup) {
+            continue;
+        }
+        if (roomNames.includes(view.viewName)) {
+            result.set(view.viewName, view);
+        }
+    }
+    return result;
+}
