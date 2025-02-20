@@ -173,7 +173,7 @@ html, body {
 }
 
 .chat-container {
-    background-color: rgba(43, 43, 43, 0.1);
+    background-color: rgba(60,60,60, 0.8);
     bottom: 10px;
     height: 360px;
     padding: 4px;
@@ -183,20 +183,44 @@ html, body {
     z-index: 10;
 }
 
+.chat-container.closed {
+    height: 26px;
+}
+
 .chat-title {
+    display: flex;
     font-size: 16px;
     font-weight: bold;
+    justify-content: space-between;
     margin: 2px 2px 8px 2px;
+}
+
+.chat-openclose {
+    content: url(../img/chevron-down.svg);
+    height: 24px;
+    width: 24px;
+}
+
+.chat-container.closed .chat-openclose {
+    content: url(../img/chevron-up.svg);
 }
 
 .chat-prompts {
     margin: 0 2px 4px 2px;
 }
 
+.chat-container.closed .chat-prompts {
+    display: none;
+}
+
 .chat-message {
     height: 166px;
     margin: 0 0 8px 0;
     overflow-y: auto;
+}
+
+.chat-container.closed .chat-message {
+    display: none;
 }
 
 .chat-message-prompt {
@@ -207,6 +231,7 @@ html, body {
 
 .chat-message-response {
     background-color: rgba(240, 240, 240, 0.8);
+    color: rgb(60,60,60);
     margin: 2px 2px 8px 20px;
     padding: 4px;
 }
@@ -215,6 +240,10 @@ html, body {
     align-items: flex-end;
     display: flex;
     height: 126px;
+}
+
+.chat-container.closed .chat-prompt-container {
+    display: none;
 }
 
 .chat-prompt-container > button {

@@ -109,6 +109,13 @@ const roomWaypoints = await getRoomWaypoints(facility, viewWaypointsGroup, roomN
 mergeMaps(roomProps, roomInfos);
 
 // chat
+const chatElement = document.getElementById('chat-container');
+const chatOpenCloseBtn = document.getElementById('chat-openclose-btn');
+
+chatOpenCloseBtn.addEventListener('click', () => {
+    chatElement.classList.toggle('closed');
+});
+
 const chatBtn = document.getElementById('chat-btn');
 
 chatBtn?.addEventListener('click', async () => {
