@@ -343,7 +343,7 @@ async function onWaypointMouseOver(element, name) {
     if (!view) {
         return;
     }
-    const url = '/twins/urn:adsk.dtt:IZ1ILnNBRn-MgN08VXDHSw/views/H3e8rzSyRcGqb5lMs2V1ZA/thumbnail';
+    const url = `/twins/${facilityId}/views/${view.id}/thumbnail`;
 
     if (waypointImageElement.src !== url) {
         waypointImageElement.src = url;
