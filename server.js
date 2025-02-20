@@ -64,6 +64,7 @@ app.get('/twins/:twinId/views/:viewId/thumbnail', async (req, res) => {
             'Authorization': `Bearer ${req.session.token}`
         }
     });
+    res.setHeader('Cache-Control', `max-age=86400`);
     Readable.fromWeb(response.body).pipe(res);
 });
 
