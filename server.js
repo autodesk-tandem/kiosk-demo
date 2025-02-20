@@ -1,4 +1,5 @@
 const express = require('express');
+const { Readable } = require('stream');
 const {
     ClientSecretCredential, 
     getBearerTokenProvider 
@@ -26,6 +27,16 @@ app.post('/auth/chat', async (req, res) => {
     res.status(200).json({
         token
     });
+});
+
+app.get('/twins/:twinId/views/:viewId/thumbnail', async (req, res) => {
+    const token = await createToken(APS_CLIENT_ID, APS_CLIENT_SECRET, 'data:read viewables:read');
+    const response = await fetch(`https://tandem.autodesk.com/api/v1/twins/${req.params.twinId}/views/${req.params.viewId}/thumbnail`, {
+        headers: {
+            'Authorization': `Bearer ${token.access_token}`
+        }
+    });
+    Readable.fromWeb(response.body).pipe(res);
 });
 
 async function createToken(clientID, clientSecret, scope) {
