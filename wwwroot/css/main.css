@@ -197,6 +197,7 @@ html, body {
 
 .chat-openclose {
     content: url(../img/chevron-down.svg);
+    cursor: pointer;
     height: 24px;
     width: 24px;
 }
