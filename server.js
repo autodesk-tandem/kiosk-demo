@@ -1,21 +1,43 @@
 const express = require('express');
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
 const { Readable } = require('stream');
 const {
     ClientSecretCredential, 
     getBearerTokenProvider 
 } = require('@azure/identity');
 
-const { APS_CLIENT_ID, APS_CLIENT_SECRET, AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET } = process.env;
+const { APS_CLIENT_ID, APS_CLIENT_SECRET, AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, SESSION_SECRET } = process.env;
 const port = process.env.PORT || 3000;
 
 const app = express();
 
 app.use(express.static('wwwroot'));
+app.use(session({
+    secret: SESSION_SECRET,
+    cookie: {
+        path: '/',
+        httpOnly: true
+    },
+    name: 'tandem.kiosk.sample',
+    resave: false,
+    saveUninitialized: false
+}));
+app.use(cookieParser());
+
 // endpoints
 app.post('/auth/token', async (req, res) => {
-    const token = await createToken(APS_CLIENT_ID, APS_CLIENT_SECRET, 'data:read viewables:read');
+    if (!req.session.token || req.session.expires_at < Date.now()) {
+        const token = await createToken(APS_CLIENT_ID, APS_CLIENT_SECRET, 'data:read viewables:read');
 
-    res.status(200).json(token);
+        // save token in session
+        req.session.expires_at = Date.now() + token.expires_in * 1000;
+        req.session.token = token.access_token;
+    }
+    res.status(200).json({
+        access_token: req.session.token,
+        expires_in: (req.session.expires_at - Date.now()) / 1000
+    });
 });
 
 app.post('/auth/chat', async (req, res) => {
@@ -30,10 +52,16 @@ app.post('/auth/chat', async (req, res) => {
 });
 
 app.get('/twins/:twinId/views/:viewId/thumbnail', async (req, res) => {
-    const token = await createToken(APS_CLIENT_ID, APS_CLIENT_SECRET, 'data:read viewables:read');
+    if (!req.session.token || req.session.expires_at < Date.now()) {
+        const token = await createToken(APS_CLIENT_ID, APS_CLIENT_SECRET, 'data:read viewables:read');
+
+        // save token in session
+        req.session.expires_at = Date.now() + token.expires_in * 1000;
+        req.session.token = token.access_token;
+    }
     const response = await fetch(`https://tandem.autodesk.com/api/v1/twins/${req.params.twinId}/views/${req.params.viewId}/thumbnail`, {
         headers: {
-            'Authorization': `Bearer ${token.access_token}`
+            'Authorization': `Bearer ${req.session.token}`
         }
     });
     Readable.fromWeb(response.body).pipe(res);
