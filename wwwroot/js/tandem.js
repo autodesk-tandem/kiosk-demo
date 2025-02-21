@@ -176,9 +176,11 @@ export async function getRoomInfoFromStreams(facility) {
 
             for (const attr of streamInfo.streamAttrs) {
                 const index = streamIds.indexOf(streamInfo.dbId);
-                const value = streamData[index][attr.id].val;
+                const value = streamData[index][attr.id]?.val;
 
-                roomData[attr.name] = value;
+                if (value !== undefined) {
+                    roomData[attr.name] = value;
+                }
             }
             if (Object.keys(roomData).length > 0) {
                 result.set(room.name, roomData);
