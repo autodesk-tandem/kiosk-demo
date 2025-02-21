@@ -4,7 +4,8 @@ A sample kiosk application to display rooms in the office building. The sample d
 ## Overview
 The sample provides a quick overview of the facility:
 - List of levels
-- List of roms per level
+- List of rooms per level
+- Predefined room views (waypoints)
 - Thematic display of rooms based on room type or status
 - Sensor information for room
 - AI powered chat bot
@@ -18,9 +19,9 @@ The sample provides a quick overview of the facility:
 1. Clone this project.
 2. Install dependencies: `npm install`
 3. Specify environment variables:
-   - `APS_CLIENT_ID`, `APS_CLIENT_SECRET`
-   - `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`
-   - `SESSION_SECRET`
+   - `APS_CLIENT_ID`, `APS_CLIENT_SECRET` - APS application credentials.
+   - `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET` - Azure credentials for OpenAI access.
+   - `SESSION_SECRET` - the secret used to sign the session ID cookie.
 
 ## Run
 - Start server: `npm start`
