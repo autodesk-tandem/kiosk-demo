@@ -8,7 +8,7 @@ const tools = [
         type: 'function',
         function: {
             name: 'query_rooms',
-            description: 'Query rooms of the building.',
+            description: 'Query rooms of the building. The result is JSON object with optional value and list of rooms names. The value is calculated based on the type of the query. The result is in generic units.',
             parameters: {
                 type: 'object',
                 properties: {
@@ -171,14 +171,13 @@ function queryRooms(args, context) {
     let value;
     
     if (filter) {
-        for (const [ name, props ] of context.roomProps.entries()) {
-            let match =  (filter.level.length === 0 || (props['Level']?.toLocaleLowerCase() === filter.level.toLocaleLowerCase())) &&
+        for (const [ name, props ] of context.roomProps) {
+            const match =  (filter.level.length === 0 || (props['Level']?.toLocaleLowerCase() === filter.level.toLocaleLowerCase())) &&
                 (filter.status.length === 0 || (props['Room Status']?.toLocaleLowerCase() === filter.status.toLocaleLowerCase()));
 
             if (match) {
                 const item = {
-                    name,
-                    level: props['Level'],
+                    name
                 };
 
                 rooms.push(item);
@@ -187,8 +186,7 @@ function queryRooms(args, context) {
     } else {
         rooms = Array.from(context.roomProps.entries()).map(([ name, props ]) => {
             return {
-                name,
-                level: props['Level'],
+                name
             }});
     }
     // add parameter values
@@ -204,26 +202,52 @@ function queryRooms(args, context) {
     }
     switch (type) {
         case 'avg':
-            response = `The average ${parameter} of rooms is 20 degrees.`;
+            {
+                const items = rooms.reduce((acc, room) => {
+                    acc.value += room.parameters[parameter];
+                    acc.items.push(room);
+                    
+                    return acc;
+                }, { value: 0.0, items: [] });
+
+                value = items.items.length > 0 ? items.value / items.items.length : 0.0;
+                rooms = items.items;
+            }
             break;
         case 'count':
             value = rooms.length;
             break;
         case 'max':
-            const items = rooms.reduce((acc, room) => {
-                if (room.parameters[parameter] > acc.value) {
-                    acc.value = room.parameters[parameter];
-                    acc.items = [room];
-                } else if (room.parameters[parameter] === acc.value) {
-                    acc.items.push(room);
-                }
-                return acc;
-            }, { value: -Infinity, items: [] });
+            {
+                const items = rooms.reduce((acc, room) => {
+                    if (room.parameters[parameter] > acc.value) {
+                        acc.value = room.parameters[parameter];
+                        acc.items = [room];
+                    } else if (room.parameters[parameter] === acc.value) {
+                        acc.items.push(room);
+                    }
+                    return acc;
+                }, { value: -Infinity, items: [] });
 
-            value = items.value;
-            rooms = items.items;
+                value = items.value;
+                rooms = items.items;
+            }
             break;
         case 'min':
+            {
+                const items = rooms.reduce((acc, room) => {
+                    if (room.parameters[parameter] < acc.value) {
+                        acc.value = room.parameters[parameter];
+                        acc.items = [room];
+                    } else if (room.parameters[parameter] === acc.value) {
+                        acc.items.push(room);
+                    }
+                    return acc;
+                }, { value: Infinity, items: [] });
+
+                value = items.value;
+                rooms = items.items;
+            }
             break;
         case 'sum':
             value = rooms.reduce((acc, room) => acc + room.parameters[parameter], 0);
@@ -237,7 +261,7 @@ function queryRooms(args, context) {
         result['value'] = value;
     }
     if (rooms.length > 0) {
-        result['rooms'] = rooms;
+        result['rooms'] = rooms.map(r => r.name);
     }
     return result;
 }
