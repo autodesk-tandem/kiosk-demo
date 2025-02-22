@@ -59,7 +59,7 @@ export function startViewer(elementName) {
  * @param {string} facilityId 
  * @returns {Promise<Autodesk.Tandem.DtFacility>}
  */
-export async function loadFacility(viewer, app, facilityId) {
+export async function loadFacility(viewer, app, facilityId, useDefaultView = false) {
     let facility = await app.getFacility(facilityId);
 
     if (!facility) {
@@ -76,8 +76,20 @@ export async function loadFacility(viewer, app, facilityId) {
             }
         }
     }
-    await app.displayFacility(facility, false, viewer);
+    let initialView;
 
+    if (useDefaultView) {
+        const views = await facility.getSavedViewsList();
+        const defaultView = views.find(v => v.default);
+        const view = await app.views.fetchSpecificView(facility, defaultView.id);
+        
+        initialView = view ?? false;
+    }
+    await app.displayFacility(facility, initialView, viewer);
+
+    if (initialView) {
+        await app.views.setCurrentView(facility, initialView);
+    }
     return facility;
 }
 
