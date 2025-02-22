@@ -37,7 +37,7 @@ const tools = [
                     parameter: {
                         type: ['string','null'],
                         description: 'Optional parameter to apply the query. Can be used on min/max queries.',
-                        enum: [ 'area', 'temperature', '' ]
+                        enum: [ 'area', 'co2', 'humidity', 'temperature', '' ]
                     }
                 },
                 required: [ 'type', 'filter','parameter' ],
@@ -166,6 +166,9 @@ function queryRooms(args, context) {
     const { type, filter, parameter } = args;
     const paramPropMap = {
         'area': 'Area',
+        'co2': 'CO2',
+        'humidity': 'Humidity',
+        'temperature': 'Temperature'
     };
     let rooms = [];
     let value;
