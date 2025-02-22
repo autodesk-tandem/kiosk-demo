@@ -187,7 +187,7 @@ function queryRooms(args, context) {
             }
         }
     } else {
-        rooms = Array.from(context.roomProps.entries()).map(([ name, props ]) => {
+        rooms = Array.from(context.roomProps.entries()).map(([ name ]) => {
             return {
                 name
             }});
@@ -198,18 +198,24 @@ function queryRooms(args, context) {
 
         for (const room of rooms) {
             const props = context.roomProps.get(room.name);
-        
-            room['parameters'] = {};
-            room['parameters'][parameter] = props[propName];
+            const value = props[propName] ?? null;
+            
+            if (value !== null) {
+                room['parameters'] = {};
+                room['parameters'][parameter] = value;
+            }
         }
     }
     switch (type) {
         case 'avg':
             {
                 const items = rooms.reduce((acc, room) => {
-                    acc.value += room.parameters[parameter];
-                    acc.items.push(room);
-                    
+                    const paramValue = room.parameters?.[parameter] ?? null;
+
+                    if (paramValue !== null) {
+                        acc.value += room.parameters[parameter];
+                        acc.items.push(room);
+                    }
                     return acc;
                 }, { value: 0.0, items: [] });
 
@@ -223,11 +229,15 @@ function queryRooms(args, context) {
         case 'max':
             {
                 const items = rooms.reduce((acc, room) => {
-                    if (room.parameters[parameter] > acc.value) {
-                        acc.value = room.parameters[parameter];
-                        acc.items = [room];
-                    } else if (room.parameters[parameter] === acc.value) {
-                        acc.items.push(room);
+                    const paramValue = room.parameters?.[parameter] ?? null;
+
+                    if (paramValue !== null) {
+                        if (paramValue > acc.value) {
+                            acc.value = paramValue;
+                            acc.items = [room];
+                        } else if (paramValue === acc.value) {
+                            acc.items.push(room);
+                        }
                     }
                     return acc;
                 }, { value: -Infinity, items: [] });
@@ -239,11 +249,15 @@ function queryRooms(args, context) {
         case 'min':
             {
                 const items = rooms.reduce((acc, room) => {
-                    if (room.parameters[parameter] < acc.value) {
-                        acc.value = room.parameters[parameter];
-                        acc.items = [room];
-                    } else if (room.parameters[parameter] === acc.value) {
-                        acc.items.push(room);
+                    const paramValue = room.parameters?.[parameter] ?? null;
+
+                    if (paramValue !== null) {
+                        if (paramValue < acc.value) {
+                            acc.value = paramValue;
+                            acc.items = [room];
+                        } else if (paramValue === acc.value) {
+                            acc.items.push(room);
+                        }
                     }
                     return acc;
                 }, { value: Infinity, items: [] });
@@ -253,7 +267,14 @@ function queryRooms(args, context) {
             }
             break;
         case 'sum':
-            value = rooms.reduce((acc, room) => acc + room.parameters[parameter], 0);
+            value = rooms.reduce((acc, room) => {
+                const paramValue = room.parameters?.[parameter] ?? null;
+
+                if (paramValue !== null) {
+                    acc += paramValue;
+                }
+                return acc;
+            }, 0);
             break;
         default:
             break;
