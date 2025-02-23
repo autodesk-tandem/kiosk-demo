@@ -165,7 +165,26 @@ export async function getFacetDef(facility, attrName) {
 }
 
 /**
- * Returns room information from streams.
+ * Get rooms in the facility. The assumption is that each room has unique name.
+ * 
+ * @param {Autodesk.Tandem.DtFacility} facility 
+ * @returns {Map<string, { dbId: number, model: Autodesk.Viewing.Model}>}
+ */
+export function getRooms(facility) {
+    const roomMap = new Map();
+
+    for (const model of facility.modelsList) {
+        const modelData = model.getData();
+
+        for (const room of modelData.rooms) {
+            roomMap.set(room.name, { dbId: room.dbId, model: model });
+        }
+    }
+    return roomMap;
+}
+
+/**
+ * Returns room information from streams. The assumption is that each room has unique name.
  * 
  * @param {Autodesk.Tandem.DtFacility} facility 
  * @returns {Promise<Map<string, { [key: string]: number | string; }>>}
