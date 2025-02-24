@@ -2,9 +2,9 @@ import {
     initializeViewer,
     startViewer,
     loadFacility,
-    getVisibleRooms,
     getFacetDef,
     getLevelViews,
+    getRooms,
     getRoomInfoFromStreams,
     getRoomProps,
     getRoomWaypoints } from './tandem.js';
@@ -80,8 +80,6 @@ const levelViews = await getLevelViews(facility, viewLevelsGroup);
 const levelNames = Array.from(levelViews.keys()).sort();
 
 populateLevels(levelsElement, levelNames);
-// we store map of currently displayed rooms
-let roomMap;
 
 // subscribe to display options
 const btnIds = [
@@ -101,11 +99,13 @@ for (const btnId of btnIds) {
     });
 }
 // collect room info (streams & props)
+const roomIds = getRooms(facility);
 const roomInfos = await getRoomInfoFromStreams(facility);
 const roomProps = await getRoomProps(facility, Object.keys(roomAttrMap));
 const roomNames = Array.from(roomProps.keys());
 const roomWaypoints = await getRoomWaypoints(facility, viewWaypointsGroup, roomNames);
 
+// merge properties with stream data
 mergeMaps(roomProps, roomInfos);
 
 // chat
@@ -231,9 +231,14 @@ async function onLevelClick(element, name) {
     // hide level labels
     facility.hud.layers.setLayerVisibility(Autodesk.Tandem.DtConstants.HUD_LAYER.LEVELS.id, false);
     // we store room map for subsequent calls
-    roomMap = getVisibleRooms(facility);
-    const roomNames = Array.from(roomMap.keys()).sort();
+    const roomNames = [];
 
+    for (const [ roomName, roomData ] of roomProps) {
+        if (roomData['Level'] === name) {
+            roomNames.push(roomName);
+        }
+    }
+    roomNames.sort();
     populateRooms(roomsElement, roomNames, roomWaypoints);
     // store current level
     currentLevel = name;
@@ -255,10 +260,10 @@ async function onRoomClick(element, name) {
         selected.classList.remove('selected');
     }
     element.classList.add('selected');
-    if (!roomMap) {
+    if (!roomIds) {
         return;
     }
-    const roomData = roomMap.get(name);
+    const roomData = roomIds.get(name);
 
     if (!roomData) {
         return;
@@ -280,7 +285,7 @@ async function onRoomClick(element, name) {
  * @param {string} name 
  */
 function onRoomMouseOver(name) {
-    const item = roomMap?.get(name);
+    const item = roomIds?.get(name);
 
     if (!item) {
         return;
@@ -456,13 +461,13 @@ async function onSendChatMessage() {
 
 function selectFacilityRooms(names) {
     // remove existing selection and set new one
-    if (!roomMap) {
+    if (!roomIds) {
         return;
     }
     const selections = [];
 
     for (const name of names) {
-        const roomData = roomMap.get(name);
+        const roomData = roomIds.get(name);
 
         if (!roomData) {
             continue;
