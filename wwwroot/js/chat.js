@@ -90,7 +90,7 @@ export async function processMessage(prompt, context) {
     const tokenResponse = await fetch('/auth/chat', {
         method: 'POST'
     });
-    const token = await tokenResponse.json();
+    const { token } = await tokenResponse.json();
     // send message
     const messages = [
         {
@@ -110,7 +110,7 @@ export async function processMessage(prompt, context) {
         const response = await fetch(url, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${token.token}`,
+                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({

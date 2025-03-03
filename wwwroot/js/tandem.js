@@ -30,8 +30,9 @@ async function createToken() {
 }
 
 function getToken(callback) {
-    createToken().then((token) => {
-        callback(token.access_token, token.expires_in);
+    console.log('getToken');
+    createToken().then(({ access_token, expires_in }) => {
+        callback(access_token, expires_in);
     });
 } 
 
