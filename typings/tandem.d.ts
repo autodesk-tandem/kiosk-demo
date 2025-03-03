@@ -64,6 +64,7 @@ declare namespace Autodesk {
       twinId: string;
       viewer: Autodesk.Viewing.GuiViewer3D;
 
+      getDefaultModel(): DtModel;
       getModels(skipDefault?: boolean): DtModel[];
       getSavedViewsList(): Promise<CompactView[]>;
       getVisibleElementsByURN(skipDefault?: boolean): { [key: string]: number[]; };
