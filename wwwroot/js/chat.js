@@ -1,8 +1,12 @@
+// this points to the OpenAI API endpoint hosted on Azure
 const AI_BASE_PATH = 'https://cog-sandbox-dev-eastus-002.openai.azure.com';
 const AI_MODEL = 'gpt-4o-mini';
 const API_VERSION = '2024-10-21';
 const url = `${AI_BASE_PATH}/openai/deployments/${AI_MODEL}/chat/completions?api-version=${API_VERSION}`;
 
+// definition of tools which are available for LLM to use.
+// query_rooms: Finds rooms based on provided criteria.
+// select_rooms**: Selects rooms based on their names.
 const tools = [
     {
         type: 'function',
@@ -70,6 +74,7 @@ const tools = [
     }
 ];
 
+// system prompt for the assistant
 const systemPrompt = `You\'re an assistant that provides real-time insights about building by querying internal API.
     Your goal is to interpret user request, call appropriate function and generate clear response.
 
@@ -85,8 +90,15 @@ const systemPrompt = `You\'re an assistant that provides real-time insights abou
     6. Handle errors gracefully.
     `;
 
+/**
+ * Process the message using the AI model. It calls Open API and returns result.
+ * 
+ * @param {string} prompt - user prompt
+ * @param {object} context - context object with room properties and selector function
+ * @return {string} - response from LLM
+ */
 export async function processMessage(prompt, context) {
-    // get token
+    // get token to call OpenAI API
     const tokenResponse = await fetch('/auth/chat', {
         method: 'POST'
     });
@@ -122,6 +134,7 @@ export async function processMessage(prompt, context) {
         const result = await response.json();
 
         for (const choice of result.choices) {
+            // process tool calls
             if (choice.finish_reason === 'tool_calls') {
                 for (const tool of choice.message.tool_calls) {
                     const name = tool.function.name;
@@ -138,6 +151,7 @@ export async function processMessage(prompt, context) {
                     }
                 }
             }
+            // nothing to process
             if (choice.finish_reason === 'stop') {
                 message = choice.message.content;
                 processMessages = false;
@@ -148,6 +162,14 @@ export async function processMessage(prompt, context) {
     return message;
 }
 
+/**
+ * Helper function to call appropriate function based on name.
+ * 
+ * @param {*} name 
+ * @param {*} args 
+ * @param {*} context 
+ * @returns 
+ */
 function callFunction(name, args, context) {
     const functionMap = {
         'query_rooms': queryRooms,
@@ -162,6 +184,13 @@ function callFunction(name, args, context) {
     return '';
 }
 
+/**
+ * Runs query on rooms based on provided arguments.
+ * 
+ * @param {object} args - input arguments from LLM.
+ * @param {object} context - context. In this case it's basically map of room properties.
+ * @returns {Array<object>} - result of query.
+ */
 function queryRooms(args, context) {
     const { type, filter, parameter } = args;
     const paramPropMap = {
@@ -206,6 +235,7 @@ function queryRooms(args, context) {
             }
         }
     }
+    // based on type of query, calculate value and filter rooms
     switch (type) {
         case 'avg':
             {
@@ -279,6 +309,7 @@ function queryRooms(args, context) {
         default:
             break;
     }
+    // create result
     const result = {};
     
     if (value !== undefined) {
@@ -290,6 +321,13 @@ function queryRooms(args, context) {
     return result;
 }
 
+/**
+ * Selects rooms based on input from LLM.
+ * 
+ * @param {object} args - input arguments from LLM.
+ * @param {object} context - context object with selector function.
+ * @returns {string} - success message
+ */
 function selectRooms(args, context) {
     context.selector(args.names);
     return 'success';
