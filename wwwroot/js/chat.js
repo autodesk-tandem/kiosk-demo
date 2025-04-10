@@ -36,7 +36,7 @@ const tools = [
                     },
                     parameter: {
                         type: ['string','null'],
-                        description: 'Optional parameter to apply the query. Can be used on min/max queries.',
+                        description: 'Optional parameter to apply the query. Can be used on avg, min, max, sum queries.',
                         enum: [ 'area', 'co2', 'humidity', 'temperature', '' ]
                     }
                 },
