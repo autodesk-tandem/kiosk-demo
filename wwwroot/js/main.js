@@ -122,9 +122,10 @@ chatBtn?.addEventListener('click', async () => {
     await onSendChatMessage();
 });
 
+// pre-defined prompts
 const promptOptions = {
     'prompt-option-1': 'Find available rooms on current level.',
-    'prompt-option-2': 'Find largest available room on current level.'
+    'prompt-option-2': 'Find and select largest available meeting room on current level.'
 };
 
 const chatPromptElement = document.getElementById('chat-prompt');
