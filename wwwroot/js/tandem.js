@@ -37,8 +37,9 @@ function getToken(callback) {
 } 
 
 /**
- * Starts the viewer.
+ * Starts the viewer. Sets toolbar to vertical position.
  * 
+ * @param {string} elementName
  * @returns {Autodesk.Viewing.GuiViewer3D}
  */
 export function startViewer(elementName) {
@@ -48,6 +49,12 @@ export function startViewer(elementName) {
         theme: 'light-theme'
     });
 
+    viewer.addEventListener('toolbarCreated', (event) => {
+        console.log(`toolbarCreated`);
+        event.target.toolbar.addClass('adsk-toolbar-vertical');
+        event.target.toolbar.container.style['justify-content'] = 'unset';
+        event.target.toolbar.container.style['top'] = '175px';
+    });
     viewer.start();
     return viewer;
 }
