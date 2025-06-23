@@ -44,7 +44,10 @@ function getToken(callback) {
  */
 export function startViewer(elementName) {
     const viewer = new Autodesk.Viewing.GuiViewer3D(document.getElementById(elementName), {
-        extensions: ['Autodesk.BoxSelection'],
+        extensions: [
+            'Autodesk.BoxSelection',
+            'Autodesk.CompGeom'
+        ],
         screenModeDelegate: Autodesk.Viewing.NullScreenModeDelegate,
         theme: 'light-theme'
     });
