@@ -8,6 +8,7 @@ const {
 } = require('@azure/identity');
 
 const { APS_CLIENT_ID, APS_CLIENT_SECRET, AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, SESSION_SECRET } = process.env;
+const BASE_URL = 'https://developer.api.autodesk.com';
 const port = process.env.PORT || 3000;
 
 const app = express();
@@ -59,7 +60,7 @@ app.get('/twins/:twinId/views/:viewId/thumbnail', async (req, res) => {
         req.session.expires_at = Date.now() + token.expires_in * 1000;
         req.session.token = token.access_token;
     }
-    const response = await fetch(`https://tandem.autodesk.com/api/v1/twins/${req.params.twinId}/views/${req.params.viewId}/thumbnail`, {
+    const response = await fetch(`${BASE_URL}/tandem/v1/twins/${req.params.twinId}/views/${req.params.viewId}/thumbnail`, {
         headers: {
             'Authorization': `Bearer ${req.session.token}`
         }
@@ -74,7 +75,7 @@ async function createToken(clientID, clientSecret, scope) {
         'grant_type': 'client_credentials',
         'scope': scope
     });
-    const response = await fetch(`https://developer.api.autodesk.com/authentication/v2/token?${options}`, {
+    const response = await fetch(`${BASE_URL}/authentication/v2/token?${options}`, {
         method: 'POST',
         headers: {
             'Authorization': `Basic ${auth}`
