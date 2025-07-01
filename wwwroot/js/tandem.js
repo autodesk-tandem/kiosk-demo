@@ -209,7 +209,7 @@ export async function getRoomInfoFromStreams(facility) {
 
     for (const model of facility.modelsList) {
         for (const room of model.getData().rooms) {
-            const streamInfo = streamInfos.find(s => s.hostElement.model.id === model.id && s.hostElement.hostId === room.dbId);
+            const streamInfo = streamInfos.find(s => s.hostElement?.model?.id === model.id && s.hostElement?.hostId === room.dbId);
 
             if (!streamInfo) {
                 continue;
