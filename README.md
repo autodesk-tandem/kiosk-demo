@@ -23,7 +23,7 @@ The goal of the demo is to illustrate use of embedded Tandem viewer and its API.
 3. Specify environment variables:
    - `APS_CLIENT_ID`, `APS_CLIENT_SECRET` - APS application credentials.
    - `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET` - Azure credentials for OpenAI access.
-   - `SESSION_SECRET` - the secret used to sign the session ID cookie.
+   - `SESSION_SECRET` - the secret used to sign the session ID cookie. It's randomly generated string.
 
 ## Run
 - Start server: `npm start`
@@ -54,7 +54,7 @@ Waypoints are predefined room views stored under the **Waypoints** group. The ap
 
 ### Coloring
 
-The application allows dynamic coloring of rooms based on their type or status. This feature dynamically creates color filters and applies colors based on the selected option.
+The application allows dynamic coloring of rooms based on their type or status. This information is stored in custom properties (Room Type, Room Stats) which are part of applied classification. This feature dynamically creates color filters and applies colors based on the selected option. 
 
 ### Twin Assistant
 
